@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<body>
+    <h1>Hello, {{ user.username }}</h1>
+    <p>Welcome to Microblog!</p>
+    {% for post in posts %}
+    <div>
+        {% if post.author.email %}
+        <p>{{ post.author.username }} ({{ post.author.email }}) says: <b>{{ post.body }}</b></p>
+        {% else %}
+        <p>{{ post.author.username }} says: <b>{{ post.body }}</b></p>
+        {% endif %}
+        </p>
+    </div>
+    {% endfor %}
+</body>
+{% endblock %}
