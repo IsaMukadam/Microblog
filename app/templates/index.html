@@ -3,21 +3,24 @@
 
 {% extends "base.html" %}
 
-
+{# Insert page-specific content into the 'content' block of base.html #}
 {% block content %}
 
-<body>
-    <h1>Hello, {{ user.username }}</h1>
-    <p>Welcome to Microblog!</p>
-    {% for post in posts %}
-    <div>
-        {% if post.author.email %}
-        <p>{{ post.author.username }} ({{ post.author.email }}) says: <b>{{ post.body }}</b></p>
-        {% else %}
-        <p>{{ post.author.username }} says: <b>{{ post.body }}</b></p>
-        {% endif %}
-        </p>
-    </div>
-    {% endfor %}
-</body>
+<!-- Greet the current user -->
+<h1>Hello, {{ user.username }}</h1>
+<p>Welcome to Microblog!</p>
+
+<!-- Loop through each post and display it -->
+{% for post in posts %}
+<div>
+    {% if post.author.email %}
+    <!-- Show author's username and email -->
+    <p>{{ post.author.username }} ({{ post.author.email }}) says: <b>{{ post.body }}</b></p>
+    {% else %}
+    <!-- Show author's username only if email is missing -->
+    <p>{{ post.author.username }} says: <b>{{ post.body }}</b></p>
+    {% endif %}
+</div>
+{% endfor %}
+
 {% endblock %}

@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    {# Set the page title dynamically if 'title' is provided, otherwise show a default #}
     {% if title %}
     <title>{{ title }} - MicroBlog</title>
     {% else %}
@@ -10,10 +11,16 @@
 </head>
 
 <body>
-    <div>MicroBlog: <a href="/index">Home</a></div>
-    <hr>
-    {% block content %}{% endblock %}
+    <!-- Navigation bar -->
+    <div>MicroBlog:
+        <a href="/index">Home</a>
+        <a href="/login">Login</a>
     </div>
+    <hr>
+
+    <!-- Placeholder for page-specific content -->
+    {% block content %}{% endblock %}
+
 </body>
 
 </html>

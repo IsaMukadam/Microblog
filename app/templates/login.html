@@ -1,0 +1,20 @@
+<!-- Extends the homepage -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Sign in</h1>
+<form action="" method="post" novalidate>
+    <!-- Form with username, password, remember me checkbox and submit button -->
+    {{ form.hidden_tag() }}
+    <p>
+        {{ form.username.label }}<br>
+        {{ form.username(size=32) }}
+    </p>
+    <p>
+        {{ form.password.label }}<br>
+        {{ form.password(size=32) }}
+    </p>
+    <p>{{ form.remember_me() }} {{ form.remember_me.label }}</p>
+    <p>{{ form.submit() }}</p>
+</form>
+{% endblock %}
