@@ -2,7 +2,8 @@
 <html>
 
 <head>
-    {# Set the page title dynamically if 'title' is provided, otherwise show a default #}
+    <!-- Set the page title dynamically if 'title' is provided, otherwise show a default -->
+    {# This is another way to comment #}
     {% if title %}
     <title>{{ title }} - MicroBlog</title>
     {% else %}
@@ -11,16 +12,23 @@
 </head>
 
 <body>
-    <!-- Navigation bar -->
+    <!-- Displaying Navigation bar -->
     <div>MicroBlog:
-        <a href="/index">Home</a>
-        <a href="/login">Login</a>
+        <a href="{{ url_for('index') }}">Home</a>
+        <a href="{{ url_for('login') }}">Login</a>
     </div>
     <hr>
-
-    <!-- Placeholder for page-specific content -->
+    <!-- Printing out the messages in a uniform list format -->
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+    <ul>
+        {% for message in messages %}
+        <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    {% endwith %}
     {% block content %}{% endblock %}
-
 </body>
 
 </html>
