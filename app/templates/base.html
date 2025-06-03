@@ -15,7 +15,12 @@
     <!-- Displaying Navigation bar -->
     <div>MicroBlog:
         <a href="{{ url_for('index') }}">Home</a>
+        {% if current_user.is_anonymous %}
         <a href="{{ url_for('login') }}">Login</a>
+        {% else %}
+        <a href="{{ url_for('logout') }}">Logout</a>
+        {% endif %}
+    </div>
     </div>
     <hr>
     <!-- Printing out the messages in a uniform list format -->

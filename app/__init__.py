@@ -1,9 +1,10 @@
-# Importing needed libs 
 from flask import Flask
-from config import Config
-from app.forms import LoginForm
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager
+
+from config import Config
+from app.forms import LoginForm
 
 # Creating an instance of the flask class
 app = Flask(__name__)
@@ -13,9 +14,11 @@ app.config.from_object(Config)
 db = SQLAlchemy(app)
 # Setting up migration engine
 migrate = Migrate(app, db)
+# Setting up the Login Manager
+login = LoginManager(app)
 
 # Importing routes
 from app import routes, models
 
-
+# Example user input
 # u = User(username='susan', email='susan@example.com')

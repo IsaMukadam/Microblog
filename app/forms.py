@@ -4,12 +4,16 @@ from wtforms.validators import DataRequired
 
 class LoginForm(FlaskForm):
     """
-    Setting up a login form with the fields username, password, remember me and submit button.
+    Login form using Flask-WTF.
+
+    Defines the fields required for user authentication, including username, password, 
+    an optional 'remember me' checkbox, and a submit button.
 
     Attributes:
-        username (StringField): Store users username
-        password (PasswordField): Stores users password
-        remember_me (BooleanField): Stores boolean remember me response
+        username (StringField): Field for entering the user's username. Required.
+        password (PasswordField): Field for entering the user's password. Required.
+        remember_me (BooleanField): Checkbox to indicate whether the user should remain logged in.
+        submit (SubmitField): Button to submit the login form.
     """
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])

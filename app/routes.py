@@ -1,14 +1,17 @@
-# Importing the render template and the app
 from flask import render_template, flash, redirect, url_for
+from flask_login import current_user, login_user
+from flask_login import logout_user
+import sqlalchemy as sa
+
 from app import app
 from app.forms import LoginForm
-
+from app.models import User
+from app import db
 
 # @app.route('/') maps the root URL (http://yourdomain.com/) to the function.
 # @app.route('/index') maps the /index URL (http://yourdomain.com/index) to the same function.
 @app.route('/')
 @app.route('/index')
-
 def index():
     """
     Renders the home page with a sample user and list of blog posts.
@@ -37,13 +40,51 @@ def index():
     ]
     return render_template('index.html', title='Home', user=user, posts=posts)
 
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    """
+    Handles user login via GET and POST requests.
+
+    GET: Renders the login form for the user.
+    POST: Validates the submitted form. If valid, flashes a login confirmation message and redirects to the index page.
+
+    Returns:
+        A rendered login template on GET or form validation failure,
+        or a redirect to the index page on successful login.
+    """
     form = LoginForm()
+    # Stops logged in user going to the login page
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = LoginForm()
+    # What occurs when a login is submitted
     if form.validate_on_submit():
-        flash('Login requested for user {}, remember_me={}'.format(form.username.data, form.remember_me.data))
+        # Checking the username and the password
+        user = db.session.scalar(
+            sa.select(User).where(User.username == form.username.data))
+        if user is None or user.check_password(form.password.data):
+            flash('Invalid username or password')
+            return redirect(url_for('login'))
+        # Logging in the user - Register the user as logged in
+        login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
     return render_template('login.html', title='Sign In', form=form)
+
+# How to display the input by the user
+# flash('Login requested for user {}, remember_me={}'.format(form.username.data, form.remember_me.data))
+
+
+@app.route('/logout')
+def logout():
+    """
+    Function to log the user out and return them to the homepage.
+    """
+    logout_user()
+    return redirect(url_for('index'))
+
+
+
 
 
 

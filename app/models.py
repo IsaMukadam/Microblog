@@ -1,60 +1,103 @@
 from typing import Optional
 from datetime import datetime, timezone
+
+from werkzeug.security import generate_password_hash, check_password_hash
 import sqlalchemy as sa
 import sqlalchemy.orm as so
+from flask_login import UserMixin
+
 from app import db
+from app import login
 
-class User(db.Model):
+
+class User(UserMixin, db.Model):
     """
-    Creating a model which represents users.
+    An SQLAlchemy model representing a user in the system.
 
-    Parameters:
-    id: A unique id as the primary key for each user.
-    username: a username up to a 64 character string.
-    email: an email up to 120 character string.
-    password_hash: a optional string value which is up to 256 character string in the form of password hashes.
+    Attributes:
+        id (int): Unique primary key for each user.
+        username (str): A unique username (max 64 characters).
+        email (str): A unique email address (max 120 characters).
+        password_hash (str, optional): The hashed password (max 256 characters).
+        posts (List[Post]): A one-to-many relationship to posts authored by the user.
 
-    Functions:
-    __repr__: Return a string representation of the User object for debugging purposes.
-    The format is <User username>, where 'username' is the value of the user's username attribute.
-    This representation is intended to be unambiguous and useful for developers.
+    Methods:
+        __repr__(): Returns a readable string representation of the user (e.g., <User johndoe>).
+        set_password(password): Hashes and stores the provided password.
+        check_password(password): Verifies a provided password against the stored hash.
+        load_user(id): Returns the user with the id specified.
     """
+
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    username: so.Mapped[str] = so.mapped_column(sa.String(64), index=True,
-                                                unique=True)
-    email: so.Mapped[str] = so.mapped_column(sa.String(120), index=True,
-                                             unique=True)
-    password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String(256))
 
-    posts: so.WriteOnlyMapped['Post'] = so.relationship(back_populates='author')
+    username: so.Mapped[str] = so.mapped_column(
+        sa.String(64),
+        index=True,
+        unique=True
+    )
+
+    email: so.Mapped[str] = so.mapped_column(
+        sa.String(120),
+        index=True,
+        unique=True
+    )
+
+    password_hash: so.Mapped[Optional[str]] = so.mapped_column(
+        sa.String(256)
+    )
+
+    posts: so.WriteOnlyMapped['Post'] = so.relationship(
+        back_populates='author'
+    )
 
     def __repr__(self):
         return '<User {}>'.format(self.username)
+
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
     
+    @login.user_loader
+    def load_user(id):
+        return db.session.get(User,int(id))
+
 
 class Post(db.Model):
     """
-    Creating a model for a user post.
+    An SQLAlchemy model representing a user post.
 
-    Parameters:
-    id: primary key and unique id for each post.
-    body: text body for the post.
-    timestamp: the time that it was posted.
-    user_id: the id of the user who posted (FK of User Table).
-    author: Represents the relationship between the user and posts.
-    
-    Functions:
-    __repr__: Displays the post body.
+    Attributes:
+    id (int): Unique primary key for each post.
+    body (str): The content of the post, limited to 140 characters.
+    timestamp (datetime): The UTC datetime when the post was created.
+    user_id (int): Foreign key referencing the user who authored the post.
+    author (User): Relationship to the User model that owns the post.
+
+    Methods:
+        __repr__(): Returns a concise string representation of the post, useful for debugging.
     """
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    body: so.Mapped[str] = so.mapped_column(sa.String(140))
-    timestamp: so.Mapped[datetime] = so.mapped_column(index=True, default=lambda: datetime.now(timezone.utc))
-    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
-    author: so.Mapped[User] = so.relationship(back_populates='posts')
+    id: so.Mapped[int] = so.mapped_column(
+        primary_key=True
+        )
+    body: so.Mapped[str] = so.mapped_column(
+        sa.String(140)
+        )
+    timestamp: so.Mapped[datetime] = so.mapped_column(
+        index=True,
+        default=lambda: datetime.now(timezone.utc)
+        )
+    user_id: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey(User.id),
+        index=True
+        )
+    author: so.Mapped[User] = so.relationship(
+        back_populates='posts'
+        )
 
     def __repr__(self):
         return '<Post {}>'.format(self.body)
-    
 
 
 # Querying the DB for specific values using .select and .where
