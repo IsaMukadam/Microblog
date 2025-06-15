@@ -6,11 +6,10 @@ from flask_login import current_user, login_required, login_user
 from flask_login import logout_user
 import sqlalchemy as sa
 
-from app import app
+from app import app, db
 from app.forms import RegistrationForm
 from app.forms import LoginForm
 from app.models import User
-from app import db
 
 # @app.route('/') maps the root URL (http://yourdomain.com/) to the function.
 # @app.route('/index') maps the /index URL (http://yourdomain.com/index) to the same function.
@@ -68,7 +67,7 @@ def login():
         # Checking the username and the password
         user = db.session.scalar(
             sa.select(User).where(User.username == form.username.data))
-        if user is None or user.check_password(form.password.data):
+        if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
             return redirect(url_for('login'))
         # Logging in the user - Register the user as logged in

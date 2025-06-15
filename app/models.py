@@ -1,3 +1,5 @@
+from app import db
+
 from typing import Optional
 from datetime import datetime, timezone
 
@@ -6,8 +8,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm as so
 from flask_login import UserMixin
 
-from app import db
-from app import login
+
 
 
 class User(UserMixin, db.Model):
@@ -61,9 +62,9 @@ class User(UserMixin, db.Model):
             return False
         return check_password_hash(self.password_hash, password)
     
-    @login.user_loader
-    def load_user(id):
-        return db.session.get(User,int(id))
+    # @login.user_loader
+    # def load_user(id):
+    #     return db.session.get(User,int(id))
 
 
 class Post(db.Model):
