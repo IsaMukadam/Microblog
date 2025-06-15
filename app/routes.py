@@ -6,8 +6,8 @@ from flask_login import current_user, login_required, login_user
 from flask_login import logout_user
 import sqlalchemy as sa
 
-
 from app import app
+from app.forms import RegistrationForm
 from app.forms import LoginForm
 from app.models import User
 from app import db
@@ -90,6 +90,37 @@ def logout():
     """
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    """
+    Registers a new user.
+
+    - Redirects authenticated users to the home page.
+    - On GET: renders the registration form.
+    - On valid POST: 
+        - Creates a new user with the submitted username, email, and hashed password.
+        - Persists the user to the database.
+        - Flashes a success message and redirects to the login page.
+    - On invalid POST or initial GET: re-renders the form with validation feedback.
+
+    Returns:
+        Response: redirect or rendered registration template.
+    """
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash(f'Congratulations, user {form.username.data} has now been registered!')
+        return redirect(url_for('login'))
+    return render_template('register.html', title='Register', form=form)
+
+
 
 
 

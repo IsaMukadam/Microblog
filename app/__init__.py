@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 
 from config import Config
-from app.forms import LoginForm
+# from app.forms import LoginForm
 
 # Creating an instance of the flask class
 app = Flask(__name__)
