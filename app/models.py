@@ -7,7 +7,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import sqlalchemy as sa
 import sqlalchemy.orm as so
 from flask_login import UserMixin
-
+from hashlib import md5
 
 
 
@@ -27,6 +27,7 @@ class User(UserMixin, db.Model):
         set_password(password): Hashes and stores the provided password.
         check_password(password): Verifies a provided password against the stored hash.
         load_user(id): Returns the user with the id specified.
+        avatar(size): Return the users gravatar icon.
     """
 
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
@@ -51,6 +52,11 @@ class User(UserMixin, db.Model):
         back_populates='author'
     )
 
+    about_me: so.Mapped[Optional[str]] = so.mapped_column(sa.String(140))
+    last_seen: so.Mapped[Optional[datetime]] = so.mapped_column(
+        default=lambda: datetime.now(timezone.utc)
+    )
+
     def __repr__(self):
         return '<User {}>'.format(self.username)
 
@@ -61,6 +67,10 @@ class User(UserMixin, db.Model):
         if self.password_hash is None:
             return False
         return check_password_hash(self.password_hash, password)
+    
+    def avatar(self, size):
+        digest = md5(self.email.lower().encode('utf-8')).hexdigest()
+        return f'https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}'
     
     # @login.user_loader
     # def load_user(id):
