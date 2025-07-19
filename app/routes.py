@@ -163,7 +163,7 @@ def edit_profile():
         A rendered HTML template for the edit profile page, or redirects back to 
         the same page with a success message after a successful update.
     """
-    form = EditProfileForm()
+    form = EditProfileForm(current_user.username)
     if form.validate_on_submit():
         current_user.username = form.username.data
         current_user.about_me = form.about_me.data
