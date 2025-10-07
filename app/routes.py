@@ -10,6 +10,7 @@ import sqlalchemy as sa
 from app import app, db
 from app.forms import RegistrationForm
 from app.forms import LoginForm
+from app.forms import EmptyForm
 from app.models import User
 from app.forms import EditProfileForm
 
@@ -128,16 +129,18 @@ def user(username):
 
     Args:
         username (str): The username of the user whose page is being displayed
-
+        form (FlaskForm): An instance of the EmptyForm class for follow/unfollow actions.
+        posts (list): A list of example posts authored by the user.
     Return:
-        Renders the user.html page
+        Renders the user.html template with the user's information, posts, and form.
     """
+    form = EmptyForm()
     user = db.first_or_404(sa.select(User).where(User.username == username))
     posts = [
         {'author': user, 'body': 'Test post #1'},
         {'author': user, 'body': 'Test post #2'}
     ]
-    return render_template('user.html', user=user, posts=posts)
+    return render_template('user.html', user=user, posts=posts, form=form)
 
 
 @app.before_request
@@ -174,6 +177,67 @@ def edit_profile():
         form.username.data = current_user.username
         form.about_me.data = current_user.about_me
     return render_template('edit_profile.html', title='Edit Profile', form=form)
+
+@app.route('/follow/<username>', methods=['POST'])
+@login_required
+def follow(username):
+    """
+    Allows the current user to follow another user.
+
+    Args:
+        username (str): The username of the user to follow.
+    Returns:
+        Redirects to the followed user's profile page on success,
+        or back to the index page if the form validation fails.
+
+    """
+    form = EmptyForm()
+    if form.validate_on_submit():
+        user = db.session.scalar(sa.select(User).where(User.username == username))
+        if user is None:
+            flash(f'User {username} not found.')
+            return redirect(url_for('index'))
+        if user == current_user:
+            flash('You cannot follow yourself!')
+            return redirect(url_for('user', username=username))
+        current_user.follow(user)
+        db.session.commit()
+        flash(f'You are following {username}!')
+        return redirect(url_for('user', username=username))
+    else:
+        return redirect(url_for('index'))
+    
+
+@app.route('/unfollow/<username>', methods=['POST'])
+@login_required
+def unfollow(username):
+    """
+    Allows the current user to unfollow another user.
+
+    Args:
+        username (str): The username of the user to unfollow.
+    Returns:
+        Redirects to the unfollowed user's profile page on success,
+        or back to the index page if the form validation fails.
+
+    """
+    form = EmptyForm()
+    if form.validate_on_submit():
+        user = db.session.scalar(sa.select(User).where(User.username == username))
+        if user is None:
+            flash(f'User {username} not found.')
+            return redirect(url_for('index'))
+        if user == current_user:
+            flash('You cannot unfollow yourself!')
+            return redirect(url_for('user', username=username))
+        current_user.unfollow(user)
+        db.session.commit()
+        flash(f'You have unfollowed {username}.')
+        return redirect(url_for('user', username=username))
+    else:
+        return redirect(url_for('index'))
+    
+
 
 
 
